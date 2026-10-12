@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Little Universe Made for You, Sayang</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,500&family=Dancing+Script:wght@500;700&family=Nunito:wght@400;600&display=swap">
+<style>
+:root{--bg1:#0a0f2c;--bg2:#1b1650;--pink:#ffb3d1;--lav:#c9b6ff;--gold:#ffd98a;--text:#f4efff;--card:rgba(255,255,255,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*:before,*:after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(ellipse at 50% 0%,var(--bg2),var(--bg1) 70%);color:var(--text);font-family:Nunito,system-ui,sans-serif;overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+.page{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 20px;opacity:0;visibility:hidden;transform:translateY(20px) scale(.98);transition:opacity .9s,transform .9s,visibility .9s}
+.page.active{opacity:1;visibility:visible;transform:none}
+h1,h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;margin:.2em 0;line-height:1.2}
+h1{font-size:clamp(2.2rem,9vw,4.2rem);background:linear-gradient(90deg,var(--pink),var(--gold),var(--lav));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(255,179,209,.5))}
+h2{font-size:clamp(1.5rem,6vw,2.4rem);color:var(--gold)}
+.script{font-family:'Dancing Script',cursive;font-size:clamp(1.5rem,6vw,2.3rem);color:var(--pink)}
+p{line-height:1.6;max-width:34rem}
+.btn{margin-top:26px;padding:14px 30px;font:600 1.05rem Nunito,sans-serif;color:#2a1650;background:linear-gradient(135deg,var(--gold),var(--pink));border:0;border-radius:999px;cursor:pointer;box-shadow:0 0 24px rgba(255,217,138,.45);transition:transform .2s}
+.btn:hover{transform:scale(1.05)}.btn:active{transform:scale(.96)}
+.btn.ghost{background:var(--card);color:var(--text);box-shadow:none;border:1px solid rgba(255,255,255,.25)}
+.fade{opacity:0;transform:translateY(12px);transition:opacity 1.2s,transform 1.2s}.fade.show{opacity:1;transform:none}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:24px 22px;max-width:36rem;width:100%;max-height:72vh;overflow-y:auto;text-align:left;backdrop-filter:blur(8px);box-shadow:0 0 40px rgba(201,182,255,.25)}
+.card p{margin:0 0 1em;max-width:none}
+.card .sig{font-family:'Dancing Script',cursive;font-size:1.3rem;color:var(--pink)}
+#hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:0 14px}
+.dots{display:flex;gap:7px}.dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:.4s}.dots i.on{background:var(--gold);box-shadow:0 0 8px var(--gold);width:22px;border-radius:8px}
+.ctl{display:flex;gap:8px}.ctl button{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:var(--card);color:var(--text);font-size:1.05rem;cursor:pointer}
+.ctl button.off{opacity:.45}
+.cake{width:200px;height:190px;margin:10px 0}
+.flame{transform-origin:100px 52px;animation:fl 1s ease-in-out infinite alternate;transition:opacity 1s,transform 1s}
+.out .flame{opacity:0;transform:scale(.1);animation:none}
+@keyframes fl{to{transform:scale(1.1,.92) rotate(3deg)}}
+.moon{position:fixed;top:12%;right:12%;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffbe8,#ffe9a8);box-shadow:0 0 60px 20px rgba(255,233,168,.35)}
+.float{position:fixed;bottom:-40px;font-size:1.6rem;animation:up linear forwards;pointer-events:none;z-index:1}
+@keyframes up{to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+#toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);left:50%;transform:translateX(-50%);background:#000a;color:#fff;padding:10px 18px;border-radius:99px;opacity:0;transition:.4s;z-index:9}
+#toast.on{opacity:1}
+.cur:after{content:'|';animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="hud">
+  <div class="dots" id="dots" aria-label="Progres"></div>
+  <div class="ctl">
+    <button id="mus" class="off" aria-label="Putar atau jeda musik" title="Musik">♪</button>
+    <button id="sfx" aria-label="Efek suara" title="Efek suara">🔔</button>
+    <button id="shr" aria-label="Bagikan link" title="Bagikan">🔗</button>
+  </div>
+</div>
+
+<main>
+<section class="page active" id="p0">
+  <p class="script fade" style="font-size:2rem">Hey, Anisa Dwi Oktavia...</p>
+  <h2 class="fade" style="color:var(--text)">Someone made something special for you.</h2>
+  <button class="btn fade" id="open">Open Your Surprise ✨</button>
+</section>
+
+<section class="page" id="p1">
+  <h1>Happy Birthday, Sayang!</h1>
+  <p class="script" id="typed" aria-live="polite"></p>
+  <button class="btn" data-next>Lanjut 💌</button>
+</section>
+
+<section class="page" id="p2">
+  <h2>A Special Message</h2>
+  <div class="card" id="letter">
+    <p>Happy birthday, Anisa Dwi Oktavia! 🎂✨</p>
+    <p>Somewhere between yesterday and tomorrow, the universe paused to celebrate you: a soft light that was always meant to arrive in this world.</p>
+    <p>May this new year hold you gently. May your heart find quiet within the noise, and may peace follow you into every room you enter.</p>
+    <p>May the prayers you whisper in silence travel farther than the stars, and return to you at exactly the right time, wrapped in the answers you needed all along.</p>
+    <p>You don't have to be everything to everyone. You are already enough, the way the moon is enough: calm, luminous, and quietly changing the tides.</p>
+    <p>You deserve so many beautiful things in this world: love that feels like home, joy that arrives unannounced, and mornings that remind you how far you've come.</p>
+    <p>Once again, happy birthday, Sayang. May your new chapter be written in soft light, unexpected happiness, and countless reasons to smile. 💗</p>
+  </div>
+  <button class="btn" data-next>Lanjut 🎂</button>
+</section>
+
+<section class="page" id="p3">
+  <svg class="cake" viewBox="0 0 200 190" role="img" aria-label="Kue ulang tahun dengan lilin">
+    <ellipse cx="100" cy="176" rx="85" ry="10" fill="#0006"/>
+    <rect x="30" y="110" width="140" height="60" rx="10" fill="#c9b6ff"/>
+    <rect x="45" y="75" width="110" height="40" rx="10" fill="#ffb3d1"/>
+    <path d="M30 118q12 14 24 0t24 0 24 0 24 0 24 0 22 0" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".85"/>
+    <rect x="96" y="50" width="8" height="28" rx="3" fill="#ffd98a"/>
+    <g class="flame"><ellipse cx="100" cy="38" rx="9" ry="15" fill="#ffd98a"/><ellipse cx="100" cy="42" rx="4.5" ry="8" fill="#fff6d6"/></g>
+  </svg>
+  <p class="script" id="wishTxt">Close your eyes, make a wish, and let the universe listen. 🕯️</p>
+  <button class="btn" id="wish">Make a Wish ✨</button>
+  <button class="btn" id="afterWish" data-next hidden>Lanjut 🌙</button>
+</section>
+
+<section class="page" id="p4">
+  <div class="moon" aria-hidden="true"></div>
+  <h1 style="font-size:clamp(1.8rem,7vw,3.2rem)">Another year older, another chapter more beautiful.</h1>
+  <p class="script">Keep shining, Sayang. The world is better with your light in it. ✨</p>
+  <button class="btn ghost" id="again">Ulangi dari awal ↺</button>
+  <p style="position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);opacity:.7;font-size:.9rem">Made with care, just for you.</p>
+</section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $=function(s){return document.querySelector(s)};
+var pages=[].slice.call(document.querySelectorAll('.page')),cur=0,dots=$('#dots');
+pages.forEach(function(){dots.appendChild(document.createElement('i'))});
+var cv=$('#cv'),cx=cv.getContext('2d'),W,H,stars=[],parts=[],shoot=null;
+function size(){var d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+ stars=[];for(var i=0;i<(W<600?90:160);i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.3,p:Math.random()*6,s:Math.random()*.02+.005,v:Math.random()*.15+.03})}
+addEventListener('resize',size);size();
+var cols=['#ffb3d1','#c9b6ff','#ffd98a','#ffffff','#9ad0ff'];
+function confetti(n){if(RM)n=Math.floor(n/4);for(var i=0;i<n;i++)parts.push({t:'c',x:Math.random()*W,y:-10-Math.random()*H*.3,vx:(Math.random()-.5)*3,vy:Math.random()*3+2,w:Math.random()*7+4,a:Math.random()*6,va:(Math.random()-.5)*.3,c:cols[i%5],l:260})}
+function spark(x,y,n){for(var i=0;i<n;i++)parts.push({t:'s',x:x,y:y,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2-.4,w:Math.random()*2.5+1,c:cols[(Math.random()*5)|0],l:40})}
+function loop(){cx.clearRect(0,0,W,H);
+ stars.forEach(function(s){s.p+=s.s;s.y-=s.v*(RM?0:1);if(s.y<0)s.y=H;cx.globalAlpha=.4+.6*Math.abs(Math.sin(s.p));cx.fillStyle='#fff';cx.beginPath();cx.arc(s.x,s.y,s.r,0,6.3);cx.fill()});
+ cx.globalAlpha=1;
+ if(!RM&&!shoot&&Math.random()<.004)shoot={x:Math.random()*W*.8+W*.2,y:Math.random()*H*.35,l:0};
+ if(shoot){var g=cx.createLinearGradient(shoot.x,shoot.y,shoot.x+90,shoot.y-50);g.addColorStop(0,'#fff');g.addColorStop(1,'transparent');cx.strokeStyle=g;cx.lineWidth=2;cx.beginPath();cx.moveTo(shoot.x,shoot.y);cx.lineTo(shoot.x+90,shoot.y-50);cx.stroke();shoot.x-=9;shoot.y+=5;if(++shoot.l>60)shoot=null}
+ parts=parts.filter(function(p){p.l--;p.x+=p.vx;p.y+=p.vy;if(p.t==='c'){p.a+=p.va;cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.globalAlpha=Math.min(1,p.l/40);cx.fillRect(-p.w/2,-p.w/4,p.w,p.w/2);cx.restore()}else{cx.globalAlpha=p.l/40;cx.fillStyle=p.c;cx.shadowColor=p.c;cx.shadowBlur=8;cx.beginPath();cx.arc(p.x,p.y,p.w,0,6.3);cx.fill();cx.shadowBlur=0}return p.l>0&&p.y<H+20});
+ cx.globalAlpha=1;requestAnimationFrame(loop)}
+loop();
+var lastS=0;function touchSpark(e){var t=Date.now();if(t-lastS<50||RM)return;lastS=t;var p=e.touches?e.touches[0]:e;spark(p.clientX,p.clientY,3)}
+addEventListener('pointermove',touchSpark);addEventListener('pointerdown',function(e){spark(e.clientX,e.clientY,10)});
+
+/* Audio (disintesis, tanpa file eksternal) */
+var ac=null,musicOn=false,sfxOn=true,timer=null,step=0,master=null;
+var notes=[261.6,329.6,392,523.3,392,329.6,293.7,349.2,440,587.3,440,349.2];
+function initA(){if(ac)return;try{ac=new(window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.5;master.connect(ac.destination)}catch(e){ac=null}}
+function tone(f,d,v,type){if(!ac)return;var o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.05);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05)}
+function chime(){if(!sfxOn||!ac)return;tone(880,.6,.12);setTimeout(function(){tone(1318,.8,.1)},110)}
+function startM(){initA();if(!ac)return;if(ac.state==='suspended')ac.resume();musicOn=true;$('#mus').classList.remove('off');clearInterval(timer);timer=setInterval(function(){var n=notes[step%notes.length];tone(n,1.6,.07);if(step%4===0)tone(n/2,2.4,.06);step++},520)}
+function stopM(){musicOn=false;$('#mus').classList.add('off');clearInterval(timer)}
+$('#mus').onclick=function(){musicOn?stopM():startM()};
+$('#sfx').onclick=function(){sfxOn=!sfxOn;this.classList.toggle('off',!sfxOn);if(sfxOn){initA();chime()}};
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2200)}
+$('#shr').onclick=function(){var u=location.href;if(navigator.share){navigator.share({title:'A Little Universe Made for You, Sayang',url:u}).catch(function(){})}else{try{navigator.clipboard.writeText(u).then(function(){toast('Link disalin 💗')},function(){toast(u)})}catch(e){toast(u)}}};
+
+/* Navigasi */
+var typedT=null;
+function go(n){pages[cur].classList.remove('active');cur=n;pages[n].classList.add('active');[].forEach.call(dots.children,function(d,i){d.classList.toggle('on',i===n)});chime();if(n===1)enter1();if(n===2)enter2();if(n===3)enter3();if(n===4)balloons(8)}
+function enter1(){confetti(160);var el=$('#typed'),txt='Today is all about you.',i=0;el.textContent='';el.classList.add('cur');clearInterval(typedT);typedT=setInterval(function(){el.textContent=txt.slice(0,++i);if(i>=txt.length){clearInterval(typedT);el.classList.remove('cur')}},RM?5:90);balloons(7)}
+function enter2(){var ps=[].slice.call($('#letter').children);ps.forEach(function(p){p.classList.remove('show');p.classList.add('fade')});$('#letter').scrollTop=0;ps.forEach(function(p,i){setTimeout(function(){if(cur===2){p.classList.add('show');if(i>2)p.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'})}},500+i*1300)})}
+function enter3(){$('#p3').classList.remove('out');$('#wish').hidden=false;$('#afterWish').hidden=true;$('#wishTxt').textContent='Close your eyes, make a wish, and let the universe listen. 🕯️'}
+function balloons(n){if(RM)return;var e=['🎈','🌸','💗','✨','🌷'];for(var i=0;i<n;i++){(function(i){setTimeout(function(){var s=document.createElement('span');s.className='float';s.textContent=e[i%5];s.style.left=Math.random()*90+'vw';s.style.animationDuration=(7+Math.random()*5)+'s';document.body.appendChild(s);setTimeout(function(){s.remove()},13000)},i*500)})(i)}}
+$('#open').onclick=function(){initA();go(1)};
+document.querySelectorAll('[data-next]').forEach(function(b){b.onclick=function(){go(cur+1)}});
+$('#wish').onclick=function(){$('#p3').classList.add('out');this.hidden=true;confetti(220);spark(W/2,H/2,60);if(sfxOn&&ac){[523,659,784,1046].forEach(function(f,i){setTimeout(function(){tone(f,1,.1)},i*120)})}
+ $('#wishTxt').textContent='May your wish find its way to you.';setTimeout(function(){$('#afterWish').hidden=false},1200)};
+$('#again').onclick=function(){go(0)};
+/* Muncul awal */
+[].forEach.call(document.querySelectorAll('#p0 .fade'),function(e,i){setTimeout(function(){e.classList.add('show')},600+i*1500)});
+go(0);
+})();
+</script>
+</body>
+</html>
